@@ -74,7 +74,8 @@ public class GameWindow extends JFrame {
         ball.draw(bufferEngine);
 
         bufferEngine.setPaint(Color.RED);
-        bufferEngine.drawString("Score: " + score,10 ,20);
+        bufferEngine.setFont(new Font("Arial", Font.BOLD, 36)); // Set font size to 24
+        bufferEngine.drawString("Score: " + score, 315, 50);
     }
 
     private void drawBufferOnScreen(){
