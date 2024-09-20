@@ -1,13 +1,13 @@
-package BouncingBallGame;
+package BouncingBall;
 
-import doctrina.Canvas;
-import doctrina.Game;
-import doctrina.GameTime;
+import BouncingBall.Ball;
+import Doctrina.Canvas;
+import Doctrina.Game;
+import Doctrina.GameTime;
 
 import java.awt.*;
 
 public final class BouncingBallGame extends Game {
-
     private int score;
     private Ball ball;
 
@@ -19,7 +19,7 @@ public final class BouncingBallGame extends Game {
     @Override
     protected void update(){
         ball.update();
-        if(ball.hasTouched()){
+        if (ball.hasTouched()){
             score += 10;
         }
     }
@@ -27,8 +27,9 @@ public final class BouncingBallGame extends Game {
     @Override
     protected void draw(Canvas canvas){
         ball.draw(canvas);
-        canvas.drawString("Score: " + score,10 ,20, Color.WHITE);
-        canvas.drawString(GameTime.getElapsedFormattedTime(),10,40,Color.WHITE);
-        canvas.drawString("FPS:" + GameTime.getCurrentFPS(),10,60,Color.WHITE);
+
+        canvas.drawString("Score: " + score, 10, 20, Color.WHITE);
+        canvas.drawString(GameTime.getElapsedFormattedTime(), 10, 40, Color.WHITE);
+        canvas.drawString("FPS: " + GameTime.getCurrentFps(), 10, 60, Color.WHITE);
     }
 }

@@ -1,12 +1,12 @@
-package doctrina;
-
-import doctrina.Canvas;
+package Doctrina;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 
 public class RenderingEngine {
+
     private JFrame frame;
     private JPanel panel;
     private BufferedImage bufferedImage;
@@ -26,8 +26,8 @@ public class RenderingEngine {
         frame.dispose();
     }
 
-    public doctrina.Canvas buildCanvas(){
-        bufferedImage = new BufferedImage(800,600, BufferedImage.TYPE_INT_RGB);
+    public Canvas buildCanvas(){
+        bufferedImage = new BufferedImage(800, 600, BufferedImage.TYPE_INT_RGB);
         bufferEngine = bufferedImage.createGraphics();
         bufferEngine.setRenderingHints(buildRenderingHints());
         return new Canvas(bufferEngine);
@@ -39,7 +39,9 @@ public class RenderingEngine {
         Toolkit.getDefaultToolkit().sync();
         graphics.dispose();
     }
-
+    public void addKeyListener(KeyListener keyListener){
+        panel.addKeyListener(keyListener);
+    }
 
     private void initializePanel() {
         panel = new JPanel();
@@ -51,21 +53,18 @@ public class RenderingEngine {
 
     private void initializeFrame() {
         frame = new JFrame();
-        frame.setSize(800,600);
+        frame.setSize(800, 600);
         frame.setLocationRelativeTo(null);
         frame.setResizable(false);
         frame.setTitle("Bouncing Balls");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setState(JFrame.NORMAL);
-        //frame.setUndecorated(true);
+        frame.setUndecorated(true);
     }
 
     private RenderingHints buildRenderingHints() {
-        RenderingHints hints = new RenderingHints(
-                RenderingHints.KEY_RENDERING,
-                RenderingHints.VALUE_ANTIALIAS_ON);
-        hints.put(RenderingHints.KEY_RENDERING,
-                RenderingHints.VALUE_RENDER_QUALITY);
+        RenderingHints hints = new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        hints.put(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         return hints;
     }
 }

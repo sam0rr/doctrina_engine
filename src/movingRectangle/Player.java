@@ -1,31 +1,38 @@
-package movingRectangle;
+package MovingRectangle;
 
-import doctrina.Canvas;
+import Doctrina.Canvas;
 
 import java.awt.*;
 
 public class Player {
 
-
+    private GamePad gamePad;
     private int x;
     private int y;
     private int speed;
 
-
-
-    public Player() {
+    public Player(GamePad gamePad){
         x = 200;
         y = 200;
         speed = 3;
+        this.gamePad = gamePad;
     }
 
-    public void update() {
-        x += speed;
+    public void update(){
+        if (gamePad.isDownPressed()){
+            y += speed;
+        } else if (gamePad.isUpPressed()) {
+            y -= speed;
+        } else if (gamePad.isLeftPressed()) {
+            x -= speed;
+        } else if (gamePad.isRightPressed()) {
+            x += speed;
+        }
     }
 
-
-    public void draw(Canvas canvas) {
+    public void draw(Canvas canvas){
+        canvas.drawRectangle(x - 10, y + 10, 40, 20, Color.RED);
+        canvas.drawRectangle(x - 10, y + 40, 40, 20, Color.RED);
         canvas.drawRectangle(x, y, 20, 60, Color.WHITE);
     }
-
 }

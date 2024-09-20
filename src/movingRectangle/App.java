@@ -1,12 +1,10 @@
-package movingRectangle;
+package MovingRectangle;
 
-import doctrina.Game;
+import Doctrina.Game;
 
 public class App {
-
     public static void main(String[] args) {
         Game game = new MovingRectangleGame();
         game.start();
     }
-
 }

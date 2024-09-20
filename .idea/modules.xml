@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/doctrina_engine.iml" filepath="$PROJECT_DIR$/doctrina_engine.iml" />
+      <module fileurl="file://$PROJECT_DIR$/doctrina-engine.iml" filepath="$PROJECT_DIR$/doctrina-engine.iml" />
     </modules>
   </component>
 </project>

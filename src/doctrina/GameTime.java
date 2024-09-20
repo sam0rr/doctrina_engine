@@ -1,29 +1,22 @@
-package doctrina;
+package Doctrina;
 
 import java.util.concurrent.TimeUnit;
 
 public class GameTime {
-
     private static final int FPS_TARGET = 60;
-    private long syncTime;
-    private static int currentFPS;
+
+    private static int currentFps;
     private static int fpsCount;
     private static long fpsTimeDelta;
     private static long gameStartTime;
+    private long syncTime;
 
-    protected GameTime(){
-        updateSynctime();
-        gameStartTime = System.currentTimeMillis();
-        fpsTimeDelta = 0;
-        currentFPS = 0;
-    }
-
-    public static long getCurrentTime(){
+    public static long getCurrentTime() {
         return System.currentTimeMillis();
     }
 
-    public static int getCurrentFPS(){
-        return (currentFPS > 0) ? currentFPS : fpsCount;
+    public static int getCurrentFps(){
+        return (currentFps > 0) ? currentFps : fpsCount;
     }
 
     public static long getElapsedTime(){
@@ -33,44 +26,51 @@ public class GameTime {
     public static String getElapsedFormattedTime(){
         long time = getElapsedTime();
         long hours = TimeUnit.MILLISECONDS.toHours(time);
-        time -= TimeUnit.MILLISECONDS.toMillis(hours);
+        time -= TimeUnit.HOURS.toMillis(hours);
         long minutes = TimeUnit.MILLISECONDS.toMinutes(time);
         time -= TimeUnit.MINUTES.toMillis(minutes);
         long seconds = TimeUnit.MILLISECONDS.toSeconds(time);
+        time -= TimeUnit.SECONDS.toMillis(minutes);
         return String.format("%02d:%02d:%02d", hours, minutes, seconds);
     }
 
-    public void syncronise(){
+    protected GameTime() {
+        updateSyncTime();
+        gameStartTime = System.currentTimeMillis();
+        fpsTimeDelta = 0;
+        currentFps = 0;
+    }
+
+    public void synchronize(){
         update();
         try {
             Thread.sleep(getSleepTime());
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        updateSynctime();
+        updateSyncTime();
     }
 
-    private void update(){
+    private void update() {
         fpsCount++;
         long currentSecond = TimeUnit.MILLISECONDS.toSeconds(getElapsedTime());
-        if(fpsTimeDelta != currentSecond){
-            currentFPS = fpsCount;
+        if (fpsTimeDelta != currentSecond){
+            currentFps = fpsCount;
             fpsCount = 0;
         }
         fpsTimeDelta = currentSecond;
     }
 
     private long getSleepTime(){
-        long targetTime = 1000l / FPS_TARGET;
+        long targetTime = 1000L / FPS_TARGET;
         long sleep = targetTime - (System.currentTimeMillis() - syncTime);
-        if (sleep < 0) {
+        if (sleep < 0){
             sleep = 4;
         }
         return sleep;
     }
 
-    private void updateSynctime() {
+    private void updateSyncTime() {
         syncTime = System.currentTimeMillis();
     }
-
 }

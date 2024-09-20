@@ -1,37 +1,44 @@
-package doctrina;
+package Doctrina;
 
-import doctrina.Canvas;
+import java.awt.event.KeyListener;
 
 public abstract class Game {
 
-
     private boolean playing = true;
-    private RenderingEngine renderingEngine;
     private GameTime gameTime;
+    private RenderingEngine renderingEngine;
 
     protected abstract void initialize();
     protected abstract void update();
-    protected abstract void draw(Canvas bufferEngine);
+    protected abstract void draw(Canvas canvas);
 
     public Game(){
         renderingEngine = new RenderingEngine();
     }
 
-    public final void start() {
+    public void addKeyListener(KeyListener keyListener){
+        renderingEngine.addKeyListener(keyListener);
+    }
+
+    public final void start(){
         initialize();
         run();
+    }
+
+    public final void stop(){
+        playing = false;
     }
 
     private void run() {
         renderingEngine.start();
         gameTime = new GameTime();
-        while(playing) {
+        while (playing) {
             update();
             draw(renderingEngine.buildCanvas());
             renderingEngine.drawBufferOnScreen();
-            gameTime.syncronise();
+            gameTime.synchronize();
         }
+        renderingEngine.stop();
     }
-
 
 }
