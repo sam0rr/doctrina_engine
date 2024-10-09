@@ -37,5 +37,10 @@ public class Tank extends ControllableEntity {
     public void draw(Canvas canvas) {
         canvas.drawRectangle(this, Color.GREEN);
 
+        if (cooldown > 0) {
+            int cooldownWidth = (cooldown * width) / 40;
+            canvas.drawRectangle(x, y - 5, cooldownWidth, 2, Color.RED);
+        }
     }
+
 }
