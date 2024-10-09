@@ -10,6 +10,7 @@ public class GamePad extends MovementController {
 
 
     public GamePad() {
+        useWasdKeys();
         bindKey(quitKey);
         bindKey(fireKey);
     }
