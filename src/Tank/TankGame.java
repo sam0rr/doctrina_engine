@@ -1,16 +1,19 @@
 package Tank;
 
 import Doctrina.Canvas;
+import Doctrina.CollidableRepository;
 import Doctrina.Game;
+import Doctrina.StaticEntity;
 
 import java.util.ArrayList;
 
 public class TankGame extends Game {
+
     private GamePad gamePad;
     private Tank tank;
     private ArrayList<Missile> missiles;
     private ArrayList<Brick> bricks;
-
+    private ArrayList<StaticEntity> killedEntities;
     @Override
     protected void initialize() {
         gamePad = new GamePad();
@@ -27,20 +30,34 @@ public class TankGame extends Game {
 
     @Override
     protected void update() {
-
         if (gamePad.isQuitPressed()) {
             stop();
         }
-
-        if (gamePad.isFiredPressed() && tank.canFire()) {
+        if (gamePad.isFirePressed() && tank.canFire()) {
             missiles.add(tank.fire());
         }
-
         tank.update();
 
+        ArrayList<StaticEntity> killedEntities = new ArrayList<>();
         for (Missile missile : missiles) {
             missile.update();
+            for (Brick brick : bricks) {
+                if (missile.hitBoxIntersectWith(brick)) {
+                    killedEntities.add(missile);
+                    killedEntities.add(brick);
+                }
+            }
         }
+
+        for (StaticEntity killedEntity : killedEntities) {
+            if (killedEntity instanceof Brick) {
+                bricks.remove(killedEntity);
+            }
+            if (killedEntity instanceof Missile) {
+                missiles.remove(killedEntity);
+            }
+        }
+        CollidableRepository.getInstance().unregisterEntities(killedEntities);
     }
 
     @Override
@@ -49,10 +66,10 @@ public class TankGame extends Game {
         for (Missile missile : missiles) {
             missile.draw(canvas);
         }
+
         for (Brick brick : bricks) {
             brick.draw(canvas);
         }
-
     }
 
 }
