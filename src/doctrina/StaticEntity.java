@@ -15,7 +15,7 @@ public abstract class StaticEntity {
         this.x = x;
         this.y = y;
     }
-    public void setDimension(int width, int height){
+    public void setDimensions(int width, int height){
         this.width = width;
         this.height = height;
     }

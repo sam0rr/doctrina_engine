@@ -7,7 +7,7 @@ import java.awt.*;
 
 public class Brick extends StaticEntity {
     public Brick(int x, int y) {
-        setDimension(16,16);
+        setDimensions(16,16);
         teleport(x,y);
     }
 

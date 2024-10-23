@@ -1,12 +1,11 @@
 package Doctrina;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import java.lang.reflect.Array;
+import java.util.*;
+import java.util.function.Consumer;
 
 public class CollidableRepository implements Iterable<StaticEntity> {
-    private static CollidableRepository instance;
+    private static  CollidableRepository instance;
 
     private final List<StaticEntity> registeredEntities;
 
@@ -23,13 +22,15 @@ public class CollidableRepository implements Iterable<StaticEntity> {
 
     public void registerEntity(StaticEntity entity) {
         registeredEntities.add(entity);
+
     }
 
     public void unregisterEntity(StaticEntity entity) {
         registeredEntities.remove(entity);
+
     }
 
-    public void registerEntities(Collection<StaticEntity> entities) {
+    public void registerEntities(Collection<StaticEntity> entities){
         registeredEntities.addAll(entities);
     }
 
@@ -45,4 +46,6 @@ public class CollidableRepository implements Iterable<StaticEntity> {
     public Iterator<StaticEntity> iterator() {
         return registeredEntities.iterator();
     }
+
+
 }

@@ -10,7 +10,7 @@ public class Player extends ControllableEntity {
     public Player(GamePad gamePad) {
         super(gamePad);
         teleport(200,200);
-        setDimension(20,20);
+        setDimensions(20,20);
         setSpeed(3);
     }
 

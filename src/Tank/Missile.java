@@ -19,7 +19,7 @@ public class Missile extends MovableEntity {
         setSpeed(5);
 
         if (tankDirection == Direction.RIGHT) {
-            setDimension(8, 4);
+            setDimensions(8, 4);
 
             // x = tankX + tank width
             // y = TankY + tankHeight/2 + missileHeight/2
@@ -29,14 +29,14 @@ public class Missile extends MovableEntity {
                     tank.getY() + tank.getHeight()/2 - height/2
             );
         } else if (tankDirection == Direction.LEFT) {
-            setDimension(8,4);
+            setDimensions(8,4);
             teleport(tank.getX()-9, tank.getY() + 15 - 2);
 
         } else if (tankDirection == Direction.DOWN) {
-            setDimension(4, 8);
+            setDimensions(4, 8);
             teleport(tank.getX() + 15 - 2, tank.getY() + 30 + 1);
         } else if (tankDirection == Direction.UP) {
-            setDimension(4, 8);
+            setDimensions(4, 8);
             teleport(tank.getX() + 15 - 2, tank.getY() - 9);
         }
     }

@@ -10,7 +10,7 @@ public class Footprint extends StaticEntity {
 
     public Footprint(int x, int y) {
         teleport(x, y);
-        setDimension(5, 5);
+        setDimensions(5, 5);
     }
 
     @Override

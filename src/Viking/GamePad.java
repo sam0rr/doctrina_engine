@@ -11,6 +11,7 @@ public class GamePad extends MovementController {
     private int fireKey = KeyEvent.VK_SPACE;
 
     public GamePad() {
+        useWasdKeys();
         bindKey(quitKey);
         bindKey(fireKey);
     }

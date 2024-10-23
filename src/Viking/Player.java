@@ -1,36 +1,102 @@
 package Viking;
 
-import java.awt.*;
+import Doctrina.*;
 import Doctrina.Canvas;
 
-public class Player {
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 
-    private GamePad gamePad;
-    private int x;
-    private int y;
-    private int speed;
+public class Player extends ControllableEntity {
+    private static final String SPRITE_PATH = "images/player.png";
 
-    public Player(GamePad gamePad) {
+    private static final int ANIMATION_SPEED = 8;
+    private int currentAnimationFrame = 1;
+    private int nextFrame = ANIMATION_SPEED;
+    private BufferedImage image;
+    private Image[] rightFrames;
+    private Image[] leftFrames;
+    private Image[] upFrames;
+    private Image[] downFrames;
 
-        x = 200;
-        y = 200;
-        speed = 3;
-        this.gamePad = gamePad;
+    public Player(MovementController controller) {
+        super(controller);
+        setDimensions(32,32);
+        setSpeed(3);
+        load();
     }
 
-    public void update() {
-        if (gamePad.isDownPressed()) {
-            y += speed;
-        } else if (gamePad.isUpPressed()) {
-            y -= speed;
-        } else if (gamePad.isLeftPressed()) {
-            x -= speed;
-        } else if (gamePad.isRightPressed()) {
-            x += speed;
+    private void load() {
+        loadSpriteSheet();
+        loadAnimationFrames();
+    }
+
+    private void loadAnimationFrames() {
+        downFrames = new Image[3];
+        downFrames[0] = image.getSubimage(0, 128, width, height);
+        downFrames[1] = image.getSubimage(32, 128, width, height);
+        downFrames[2] = image.getSubimage(64, 128, width, height);
+
+        leftFrames = new Image[3];
+        leftFrames[0] = image.getSubimage(0, 160, width, height);
+        leftFrames[1] = image.getSubimage(32, 160, width, height);
+        leftFrames[2] = image.getSubimage(64, 160, width, height);
+
+        rightFrames = new Image[3];
+        rightFrames[0] = image.getSubimage(0, 192, width, height);
+        rightFrames[1] = image.getSubimage(32, 192, width, height);
+        rightFrames[2] = image.getSubimage(64, 192, width, height);
+
+        upFrames = new Image[3];
+        upFrames[0] = image.getSubimage(0, 224, width, height);
+        upFrames[1] = image.getSubimage(32, 224, width, height);
+        upFrames[2] = image.getSubimage(64, 224, width, height);
+    }
+
+    private void loadSpriteSheet() {
+        try {
+            image = ImageIO.read(
+                    this.getClass().getClassLoader().getResourceAsStream(SPRITE_PATH)
+            );
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        } finally {
+            //System.out.println("TOUJOURS EXECUTER");
         }
     }
 
+    @Override
+    public void update() {
+        super.update();
+        moveWithController();
+
+        if (hasMoved()) {
+            --nextFrame;
+            if (nextFrame == 0) {
+                ++currentAnimationFrame;
+                if (currentAnimationFrame >= leftFrames.length) {
+                    currentAnimationFrame = 0;
+                }
+                nextFrame = ANIMATION_SPEED;
+            }
+        } else {currentAnimationFrame = 1;
+        }
+    }
+
+    @Override
     public void draw(Canvas canvas) {
-        canvas.drawRectangle(x, y, 20, 60, Color.WHITE);
+        if (getDirection() == Direction.RIGHT) {
+            canvas.drawImage(rightFrames[currentAnimationFrame], x, y);
+        } else if (getDirection() == Direction.LEFT) {
+            canvas.drawImage(leftFrames[currentAnimationFrame], x, y);
+        } else if (getDirection() == Direction.UP) {
+            canvas.drawImage(upFrames[currentAnimationFrame], x, y);
+        } else if (getDirection() == Direction.DOWN) {
+            canvas.drawImage(downFrames[currentAnimationFrame], x, y);
+        }
+//        if (GameConfig.isDebugEnabled()) {
+//            drawHitBox(canvas);
+//        }
     }
 }
