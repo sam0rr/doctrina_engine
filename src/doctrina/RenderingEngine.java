@@ -62,7 +62,7 @@ public class RenderingEngine {
 
     private void initializeFrame() {
         frame = new JFrame();
-        frame.setSize(800, 600);
+        frame.setSize(800, 550);
         frame.setLocationRelativeTo(null);
         frame.setResizable(false);
         frame.setTitle("Bouncing Balls");

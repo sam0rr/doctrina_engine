@@ -16,12 +16,12 @@ public class Canvas {
     }
 
     public void drawCircle(int x, int y, int radius, Paint paint) {
+        System.out.println("Drawing circle at (" + x + ", " + y + ") with radius " + radius);  // Debugging output
         graphics.setPaint(paint);
-        graphics.fillOval(x, y, radius * 2, radius * 2);
+        graphics.fillOval(x - radius, y - radius, radius * 2, radius * 2);  // Ensure proper positioning
     }
 
     public void drawRectangle(StaticEntity entity, Paint paint) {
-
         drawRectangle(entity.getX(), entity.getY(), entity.getWidth(), entity.getHeight(), paint);
     }
 
@@ -32,5 +32,10 @@ public class Canvas {
 
     public void drawImage(Image image, int x, int y) {
         graphics.drawImage(image, x, y, null);
+    }
+
+    // Getter for Graphics2D object
+    public Graphics2D getGraphics2D() {
+        return graphics;
     }
 }
