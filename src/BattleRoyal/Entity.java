@@ -5,12 +5,20 @@ import Doctrina.Canvas;
 import java.util.Random;
 
 public abstract class Entity {
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
     public int x, y;             // Position
     protected int width, height; // Dimensions
     protected int health;        // Health
     protected boolean isAlive;   // Is the entity alive?
     protected int speed;         // Movement speed
-    private static final int MAX_HEALTH = 100;  // Maximum health for all entities
+    private static final int MAX_HEALTH = 1000;  // Maximum health for all entities
 
 
     // Constructor for setting initial position, dimensions, and speed

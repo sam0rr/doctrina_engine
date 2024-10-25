@@ -36,7 +36,7 @@ public class RenderingEngine {
     }
 
     public Canvas buildCanvas(){
-        bufferedImage = new BufferedImage(800, 600, BufferedImage.TYPE_INT_RGB);
+        bufferedImage = new BufferedImage(1000, 650, BufferedImage.TYPE_INT_RGB);
         bufferEngine = bufferedImage.createGraphics();
         bufferEngine.setRenderingHints(buildRenderingHints());
         return new Canvas(bufferEngine);
@@ -62,10 +62,9 @@ public class RenderingEngine {
 
     private void initializeFrame() {
         frame = new JFrame();
-        frame.setSize(800, 550);
+        frame.setSize(1000, 650);
         frame.setLocationRelativeTo(null);
         frame.setResizable(false);
-        frame.setTitle("Bouncing Balls");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setState(JFrame.NORMAL);
         frame.setUndecorated(true);

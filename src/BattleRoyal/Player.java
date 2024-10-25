@@ -8,11 +8,11 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.Random;
 
 public class Player extends Entity {
     private static final String SPRITE_PATH = "images/player.png";
-    private static final int STORM_DAMAGE = 1; // Damage per frame when in the storm
+    private static final double SCALE_FACTOR = 1.7;  // Scale factor to double the player's size
+    private static final int STORM_DAMAGE = 1;       // Damage per frame when in the storm
     private static final int ANIMATION_SPEED = 8;
 
     private int currentAnimationFrame = 1;
@@ -22,65 +22,74 @@ public class Player extends Entity {
     private Image[] leftFrames;
     private Image[] upFrames;
     private Image[] downFrames;
+    private Direction lastDirection;
 
     private Storm storm;
     private BattleRoyalGame game;
     private MovementController controller;
 
-
     public Player(MovementController controller, Storm storm, BattleRoyalGame game, World world) {
-        super(world, 32, 32, 5);  // Call Entity constructor with random position, size, and speed
+        super(world, (int) (32 * SCALE_FACTOR), (int) (32 * SCALE_FACTOR), 5);  // Double size with scale factor
 
         this.storm = storm;
         this.game = game;
         this.controller = controller;
+        this.lastDirection = Direction.DOWN;
         load();  // Load player sprite and animation frames
     }
-
-
-
 
     private void load() {
         loadSpriteSheet();
         loadAnimationFrames();
     }
 
-    private void loadAnimationFrames() {
-        downFrames = new Image[3];
-        downFrames[0] = image.getSubimage(0, 128, width, height);
-        downFrames[1] = image.getSubimage(32, 128, width, height);
-        downFrames[2] = image.getSubimage(64, 128, width, height);
-
-        leftFrames = new Image[3];
-        leftFrames[0] = image.getSubimage(0, 160, width, height);
-        leftFrames[1] = image.getSubimage(32, 160, width, height);
-        leftFrames[2] = image.getSubimage(64, 160, width, height);
-
-        rightFrames = new Image[3];
-        rightFrames[0] = image.getSubimage(0, 192, width, height);
-        rightFrames[1] = image.getSubimage(32, 192, width, height);
-        rightFrames[2] = image.getSubimage(64, 192, width, height);
-
-        upFrames = new Image[3];
-        upFrames[0] = image.getSubimage(0, 224, width, height);
-        upFrames[1] = image.getSubimage(32, 224, width, height);
-        upFrames[2] = image.getSubimage(64, 224, width, height);
-    }
-
     private void loadSpriteSheet() {
         try {
-            image = ImageIO.read(
-                    this.getClass().getClassLoader().getResourceAsStream(SPRITE_PATH)
-            );
+            image = ImageIO.read(this.getClass().getClassLoader().getResourceAsStream(SPRITE_PATH));
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
     }
 
+    private void loadAnimationFrames() {
+        downFrames = new Image[3];
+        downFrames[0] = getScaledImage(image.getSubimage(0, 128, 32, 32));
+        downFrames[1] = getScaledImage(image.getSubimage(32, 128, 32, 32));
+        downFrames[2] = getScaledImage(image.getSubimage(64, 128, 32, 32));
+
+        leftFrames = new Image[3];
+        leftFrames[0] = getScaledImage(image.getSubimage(0, 160, 32, 32));
+        leftFrames[1] = getScaledImage(image.getSubimage(32, 160, 32, 32));
+        leftFrames[2] = getScaledImage(image.getSubimage(64, 160, 32, 32));
+
+        rightFrames = new Image[3];
+        rightFrames[0] = getScaledImage(image.getSubimage(0, 192, 32, 32));
+        rightFrames[1] = getScaledImage(image.getSubimage(32, 192, 32, 32));
+        rightFrames[2] = getScaledImage(image.getSubimage(64, 192, 32, 32));
+
+        upFrames = new Image[3];
+        upFrames[0] = getScaledImage(image.getSubimage(0, 224, 32, 32));
+        upFrames[1] = getScaledImage(image.getSubimage(32, 224, 32, 32));
+        upFrames[2] = getScaledImage(image.getSubimage(64, 224, 32, 32));
+    }
+
+    // Scales the given image based on the SCALE_FACTOR
+    private Image getScaledImage(BufferedImage img) {
+        int scaledWidth = (int) (img.getWidth() * SCALE_FACTOR);
+        int scaledHeight = (int) (img.getHeight() * SCALE_FACTOR);
+        BufferedImage scaledImage = new BufferedImage(scaledWidth, scaledHeight, img.getType());
+
+        Graphics2D g2d = scaledImage.createGraphics();
+        g2d.drawImage(img, 0, 0, scaledWidth, scaledHeight, null);
+        g2d.dispose();
+
+        return scaledImage;
+    }
+
     @Override
     public void update() {
-        super.update();  // Call the update logic from Entity
-        moveWithController();  // Handle player-specific movement
+        super.update();
+        moveWithController();
 
         // Update animation frames
         if (controller.isMoving()) {
@@ -96,48 +105,57 @@ public class Player extends Entity {
             currentAnimationFrame = 1;
         }
 
-        // Apply storm damage if the player is outside the safe zone
-        if (!storm.isPlayerInSafeZone(getX(), getY())) {
-            takeDamage(STORM_DAMAGE);
-        }
-    }
+        //TODO --> apply storm damage
 
-    public int getY() {
-        return x;
-    }
-
-    public int getX() {
-        return y;
     }
 
     @Override
     protected void onDeath() {
-        game.onPlayerDeath();  // Notify the game that the player has died
-    }
-
-    // Method to draw a temporary red rectangle around the player (hitbox)
-    private void drawHitbox(Canvas canvas) {
-        Color transparentRed = new Color(255, 0, 0, 128);  // Red with transparency
-        canvas.drawRectangle(x, y, width, height, transparentRed);  // Draw hitbox
+        game.onPlayerDeath();
     }
 
     @Override
     public void draw(Canvas canvas) {
-        if (controller.getDirection() == Direction.RIGHT) {
-            canvas.drawImage(rightFrames[currentAnimationFrame], x, y);
-        } else if (controller.getDirection() == Direction.LEFT) {
-            canvas.drawImage(leftFrames[currentAnimationFrame], x, y);
-        } else if (controller.getDirection() == Direction.UP) {
-            canvas.drawImage(upFrames[currentAnimationFrame], x, y);
-        } else if (controller.getDirection() == Direction.DOWN) {
-            canvas.drawImage(downFrames[currentAnimationFrame], x, y);
+        draw(canvas, 0, 0); // Default draw with no offset
+    }
+
+    public void draw(Canvas canvas, int cameraX, int cameraY) {
+        Direction direction = controller.getDirection();
+        if (direction == null) {
+            direction = lastDirection;
         }
 
-        // Draw the hitbox around the player
-        drawHitbox(canvas);
+        // Adjust player drawing position based on camera offset
+        int drawX = x - cameraX;
+        int drawY = y - cameraY;
 
-        // Draw the player's health bar
-        drawHealthBar(canvas);
+        // Draw based on the direction
+        if (direction == Direction.RIGHT) {
+            canvas.drawImage(rightFrames[currentAnimationFrame], drawX, drawY);
+        } else if (direction == Direction.LEFT) {
+            canvas.drawImage(leftFrames[currentAnimationFrame], drawX, drawY);
+        } else if (direction == Direction.UP) {
+            canvas.drawImage(upFrames[currentAnimationFrame], drawX, drawY);
+        } else if (direction == Direction.DOWN) {
+            canvas.drawImage(downFrames[currentAnimationFrame], drawX, drawY);
+        }
+
+        // Draw the player's health bar with camera offset
+        drawHealthBar(canvas, drawX, drawY);
+
+        String positionText = "Pos: (" + x + ", " + y + ")";
+        canvas.drawString(positionText, drawX, drawY - 20, Color.WHITE);
+    }
+
+    protected void drawHealthBar(Canvas canvas, int drawX, int drawY) {
+        int barWidth = (int) (32*1.7);  // Scale health bar width to match new player size
+        int barHeight = 5;
+        int barX = drawX;
+        int barY = drawY - 10;
+
+        canvas.drawRectangle(barX, barY, barWidth, barHeight, Color.RED);
+        int healthWidth = (int) ((health / 100.0f) * barWidth);
+        canvas.drawRectangle(barX, barY, healthWidth, barHeight, Color.GREEN);
     }
 
     @Override
@@ -145,19 +163,12 @@ public class Player extends Entity {
         Direction direction = controller.getDirection();
 
         if (direction != null) {
+            lastDirection = direction;
             switch (direction) {
-                case UP:
-                    y -= speed;
-                    break;
-                case DOWN:
-                    y += speed;
-                    break;
-                case LEFT:
-                    x -= speed;
-                    break;
-                case RIGHT:
-                    x += speed;
-                    break;
+                case UP -> y -= speed;
+                case DOWN -> y += speed;
+                case LEFT -> x -= speed;
+                case RIGHT -> x += speed;
             }
         }
     }

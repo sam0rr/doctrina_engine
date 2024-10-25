@@ -11,10 +11,9 @@ public class BattleRoyalGame extends Game {
     private GamePad gamePad;
     private Player player;
     private World world;
+    private Camera camera;  // Camera instance
 
     private Storm storm;  // Storm instance
-
-    private Tree tree;
     private int soundCooldown;  // Cooldown variable should be a field
 
     @Override
@@ -26,11 +25,12 @@ public class BattleRoyalGame extends Game {
         // Initialize the storm before the player, so it's available when creating the player
         storm = new Storm(world.getWidth(), world.getHeight());  // Pass the world dimensions to the storm
 
-        player = new Player(gamePad, storm, this, world);  // Pass the world object as well
-// Pass the storm and game reference to the player
-
+        // Initialize the player and camera
+        player = new Player(gamePad, storm, this, world);
+        camera = new Camera(1000, 650, world);  // Pass world to the camera
+// Set camera dimensions to match the screen width and height
         soundCooldown = 0;  // Initialize the cooldown
-        tree = new Tree(300,350);
+
         try {
             Clip backgroundClip = AudioSystem.getClip();
             AudioInputStream backgroundStream = AudioSystem.getAudioInputStream(
@@ -46,17 +46,12 @@ public class BattleRoyalGame extends Game {
 
     @Override
     protected void update() {
-        player.update();  // Update the player, which will now apply storm damage if outside the zone
-        storm.shrink();   // Update the storm (shrink it over time)
+        player.update();  // Update the player
+        storm.shrink();   // Update the storm
+        camera.update(player);  // Update camera to follow the player
 
         if (gamePad.isQuitPressed()) {
             stop();
-        }
-
-        if (player.getY() < tree.getY() + 52) {
-            tree.blockadeFromTop();
-        } else {
-            tree.blockadeFromBottom();
         }
 
         if (soundCooldown > 0) {
@@ -81,21 +76,20 @@ public class BattleRoyalGame extends Game {
 
     @Override
     protected void draw(Canvas canvas) {
-        // First, draw the world
-        world.draw(canvas);
+        int offsetX = camera.getX();
+        int offsetY = camera.getY();
 
-        // Draw the storm after the world
-        storm.draw(canvas);  // Ensure the storm is drawn
+        // Draw the world based on the camera's offset
+        world.draw(canvas, -offsetX, -offsetY);
 
-        // Now, draw the player and tree
-        if (player.getY() < tree.getY() + 52) {
-            player.draw(canvas);
-            tree.draw(canvas);
-        } else {
-            tree.draw(canvas);
-            player.draw(canvas);
-        }
+        // Draw the storm based on camera offset
+        storm.draw(canvas, -offsetX, -offsetY);
+
+        // Draw player and other entities with camera offet
+        player.draw(canvas, offsetX, offsetY);
+
     }
+
 
     // Method to handle player death and stop the game
     public void onPlayerDeath() {
