@@ -1,6 +1,9 @@
 package Doctrina;
 
 import java.awt.*;
+import java.awt.geom.Area;
+import java.awt.geom.Ellipse2D;
+import java.util.Stack;
 
 public class Canvas {
 
@@ -16,13 +19,15 @@ public class Canvas {
     }
 
     public void drawCircle(int x, int y, int radius, Paint paint) {
-        System.out.println("Drawing circle at (" + x + ", " + y + ") with radius " + radius);  // Debugging output
-        graphics.setPaint(paint);
-        graphics.fillOval(x - radius, y - radius, radius * 2, radius * 2);  // Ensure proper positioning
-    }
-
-    public void drawRectangle(StaticEntity entity, Paint paint) {
-        drawRectangle(entity.getX(), entity.getY(), entity.getWidth(), entity.getHeight(), paint);
+        if (paint instanceof Color && ((Color) paint).getAlpha() == 0) {
+            Composite originalComposite = graphics.getComposite();
+            graphics.setComposite(AlphaComposite.Clear);
+            graphics.fill(new Ellipse2D.Float(x - radius, y - radius, radius * 2, radius * 2));
+            graphics.setComposite(originalComposite);
+        } else {
+            graphics.setPaint(paint);
+            graphics.fillOval(x - radius, y - radius, radius * 2, radius * 2);
+        }
     }
 
     public void drawRectangle(int x, int y, int width, int height, Paint paint) {
@@ -30,11 +35,19 @@ public class Canvas {
         graphics.fillRect(x, y, width, height);
     }
 
+    public void drawRectangle(StaticEntity entity, Paint paint) {
+        drawRectangle(entity.getX(), entity.getY(), entity.getWidth(), entity.getHeight(), paint);
+    }
+
+    public void drawRectangle(StaticEntity entity) {
+        Paint defaultPaint = new Color(0, 0, 255, 100);
+        drawRectangle(entity.getX(), entity.getY(), entity.getWidth(), entity.getHeight(), defaultPaint);
+    }
+
     public void drawImage(Image image, int x, int y) {
         graphics.drawImage(image, x, y, null);
     }
 
-    // Getter for Graphics2D object
     public Graphics2D getGraphics2D() {
         return graphics;
     }

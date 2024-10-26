@@ -8,6 +8,14 @@ public abstract class StaticEntity {
     protected int width;
     protected int height;
 
+    // Default constructor
+    public StaticEntity() {}
+
+    // Constructor to initialize x and y
+    public StaticEntity(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
 
     public abstract void draw(Canvas canvas);
 
@@ -15,6 +23,7 @@ public abstract class StaticEntity {
         this.x = x;
         this.y = y;
     }
+
     public void setDimensions(int width, int height){
         this.width = width;
         this.height = height;
@@ -24,8 +33,8 @@ public abstract class StaticEntity {
         return getBounds().intersects(entity.getBounds());
     }
 
-    protected Rectangle getBounds() {
-        return  new Rectangle(x,y,width,height);
+    public Rectangle getBounds() {
+        return new Rectangle(x, y, width, height);
     }
 
     public int getX() {

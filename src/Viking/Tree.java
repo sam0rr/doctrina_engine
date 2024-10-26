@@ -16,8 +16,7 @@ public class Tree extends StaticEntity {
 
     public Tree(int x, int y) {
         teleport(x,y);
-        blockade = new Blockade();
-        blockade.setDimensions(30,16);
+        blockade = new Blockade(4,6,6,4);
         load();
 
     }

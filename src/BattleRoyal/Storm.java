@@ -1,106 +1,188 @@
 package BattleRoyal;
 
 import Doctrina.Canvas;
-import java.awt.Color;
+import Doctrina.GameTime;
+
+import java.awt.*;
+import java.awt.geom.Area;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Rectangle2D;
 import java.util.Random;
 
 public class Storm {
     private int radius;
-    private int targetRadius;  // New target radius for smooth transition
-    private int xCenter, yCenter; // Center coordinates of the storm
-    private int shrinkCooldown;   // Time before next shrink
-    private int currentPhase;     // Current phase of the storm
-    private int pauseDuration;    // Time to pause between shrink phases
-    private boolean isPaused;     // Indicates whether the storm is in a pause phase
-    private Random random;        // For generating random positions
+    private int targetRadius;
+    private int xCenter, yCenter;
+    private int currentPhase;
+    private boolean isStormActive;
+    private Random random;
 
-    // Canvas dimensions (for random center positioning)
-    private int canvasWidth;
-    private int canvasHeight;
+    private int mapWidth;
+    private int mapHeight;
+    private long phaseStartTime;
+    private long shrinkStartTime;
+    private long lastUpdateTime;
 
-    // Variables to manage smooth shrinking
-    private int shrinkStepsLeft;  // Remaining frames to shrink
+    private boolean isWaiting;
+    private boolean isShrinking;
 
-    public Storm(int canvasWidth, int canvasHeight) {
-        this.shrinkCooldown = 500;  // Example cooldown between shrinks (500 frames)
-        this.currentPhase = 1;      // Start in phase 1
-        this.pauseDuration = 600;  // Pause for 20 seconds at 60 FPS (20 * 60 = 1200 frames)
-        this.isPaused = false;      // Start with no pause
+    // Phase and shrink durations in seconds
+    private final int phase1DurationSec, phase2DurationSec, phase3DurationSec, phase4DurationSec;
+    private final int phase1ShrinkDurationSec, phase2ShrinkDurationSec, phase3ShrinkDurationSec, phase4ShrinkDurationSec;
+    private float shrinkSpeedPerSec;
+
+    public Storm(World world, int phase1DurationSec, int phase2DurationSec, int phase3DurationSec, int phase4DurationSec,
+                 int phase1ShrinkDurationSec, int phase2ShrinkDurationSec, int phase3ShrinkDurationSec, int phase4ShrinkDurationSec) {
+        this.phase1DurationSec = phase1DurationSec;
+        this.phase2DurationSec = phase2DurationSec;
+        this.phase3DurationSec = phase3DurationSec;
+        this.phase4DurationSec = phase4DurationSec;
+
+        this.phase1ShrinkDurationSec = phase1ShrinkDurationSec;
+        this.phase2ShrinkDurationSec = phase2ShrinkDurationSec;
+        this.phase3ShrinkDurationSec = phase3ShrinkDurationSec;
+        this.phase4ShrinkDurationSec = phase4ShrinkDurationSec;
+
+        this.currentPhase = 1;
+        this.isStormActive = true;
+        this.isWaiting = true;
+        this.isShrinking = false;
+
+        this.mapWidth = world.getWidth();
+        this.mapHeight = world.getHeight();
+        this.radius = (int) (Math.sqrt(mapWidth * mapWidth + mapHeight * mapHeight));
+        this.targetRadius = Math.max(radius / 2, 600);
+
+        this.lastUpdateTime = GameTime.getCurrentTime();
         this.random = new Random();
-        this.canvasWidth = 2400;
-        this.canvasHeight = 2400;
 
-        // Start with the storm covering the entire map (no storm effect initially)
-        this.radius = (Math.max(canvasWidth, canvasHeight)); // Large enough to cover the whole map
-        this.targetRadius = radius;
-
-        // Initialize shrinking steps
-        this.shrinkStepsLeft = shrinkCooldown;
-
-        // Set the initial position for the storm center at a random location
         randomizeCenter();
+        System.out.println("Initial storm setup: radius=" + radius + ", xCenter=" + xCenter + ", yCenter=" + yCenter);
+
+        setShrinkSpeedPerSec(getCurrentShrinkDurationSec());
     }
 
-    // Shrink the storm radius smoothly during the cooldown period
-    public void shrink() {
-        if (isPaused) {
-            if (pauseDuration > 0) {
-                pauseDuration--;
-            } else {
-                isPaused = false;
-                pauseDuration = 400;
-                shrinkStepsLeft = shrinkCooldown;
-            }
-        } else {
-            if (shrinkStepsLeft > 0) {
-                int shrinkAmountPerStep = (radius - targetRadius) / shrinkStepsLeft;
-                radius -= shrinkAmountPerStep;
-                shrinkStepsLeft--;
-            }
+    public void updateStorm() {
+        if (!isStormActive) return;
 
-            if (shrinkStepsLeft == 0) {
-                isPaused = true;
-                handlePhaseTransition();
-            }
+        long currentTime = GameTime.getCurrentTime();
+        float deltaTimeSec = (currentTime - lastUpdateTime) / 1000f;
+        lastUpdateTime = currentTime;
+
+        if (isWaiting) {
+            updateWaiting(currentTime);
+        } else if (isShrinking) {
+            updateShrinking(deltaTimeSec);
+        }
+    }
+
+    private void updateWaiting(long currentTime) {
+        if (phaseStartTime == 0) phaseStartTime = currentTime;
+
+        int currentPhaseDurationMs = getPhaseDurationSec() * 1000;
+        long elapsedTimeMs = currentTime - phaseStartTime;
+
+        if (elapsedTimeMs >= currentPhaseDurationMs) {
+            isWaiting = false;
+            isShrinking = true;
+            shrinkStartTime = currentTime;
+            setShrinkSpeedPerSec(getCurrentShrinkDurationSec());
+            System.out.println("Phase duration over. Starting to shrink.");
+        }
+    }
+
+    private void updateShrinking(float deltaTimeSec) {
+        float shrinkAmount = shrinkSpeedPerSec * deltaTimeSec;
+        radius = (int) Math.max(radius - shrinkAmount, targetRadius);
+
+
+        if (radius <= targetRadius) {
+            isShrinking = false;
+            handlePhaseTransition();
         }
     }
 
     private void handlePhaseTransition() {
         currentPhase++;
-
-        if (currentPhase == 2) {
-            targetRadius = Math.max(radius / 2, 100);
-        } else if (currentPhase == 3) {
-            targetRadius = Math.max(radius / 2, 50);
-        } else if (currentPhase == 4) {
-            targetRadius = 0;
+        if (currentPhase > 4) {
+            System.out.println("All phases completed.");
+            isStormActive = false;
+            return;
         }
+
+        phaseStartTime = 0;
+        targetRadius = calculateTargetRadiusForPhase(currentPhase);
+        setShrinkSpeedPerSec(getCurrentShrinkDurationSec());
+        isWaiting = true;
+    }
+
+    private int calculateTargetRadiusForPhase(int phase) {
+        return switch (phase) {
+            case 2 -> Math.max(radius / 2, 300);
+            case 3 -> Math.max(radius / 2, 150);
+            case 4 -> 0;
+            default -> radius;
+        };
+    }
+
+    public String getPhaseInfo() {
+        if (!isStormActive) return "Storm completed.";
+
+        long currentTime = GameTime.getCurrentTime();
+        int timeLeftSeconds = 0;
+
+        if (isWaiting) {
+            int currentPhaseDurationSec = getPhaseDurationSec();
+            long elapsedTimeSec = (currentTime - phaseStartTime) / 1000;
+            timeLeftSeconds = Math.max(currentPhaseDurationSec - (int) elapsedTimeSec, 0);
+        } else if (isShrinking) {
+            int shrinkDurationSec = getCurrentShrinkDurationSec();
+            long elapsedShrinkTimeSec = (currentTime - shrinkStartTime) / 1000;
+            timeLeftSeconds = Math.max(shrinkDurationSec - (int) elapsedShrinkTimeSec, 0);
+        }
+
+        return "Phase " + currentPhase + " - Time Left: " + timeLeftSeconds + "s";
+    }
+
+    private int getPhaseDurationSec() {
+        return switch (currentPhase) {
+            case 2 -> phase2DurationSec;
+            case 3 -> phase3DurationSec;
+            case 4 -> phase4DurationSec;
+            default -> phase1DurationSec;
+        };
+    }
+
+    private int getCurrentShrinkDurationSec() {
+        return switch (currentPhase) {
+            case 2 -> phase2ShrinkDurationSec;
+            case 3 -> phase3ShrinkDurationSec;
+            case 4 -> phase4ShrinkDurationSec;
+            default -> phase1ShrinkDurationSec;
+        };
+    }
+
+    private void setShrinkSpeedPerSec(int shrinkDurationSec) {
+        int shrinkDistance = radius - targetRadius;
+        this.shrinkSpeedPerSec = (float) shrinkDistance / shrinkDurationSec;
     }
 
     private void randomizeCenter() {
         if (currentPhase < 4) {
-            xCenter = random.nextInt(canvasWidth);
-            yCenter = random.nextInt(canvasHeight);
+            xCenter = random.nextInt(mapWidth);
+            yCenter = random.nextInt(mapHeight);
+            System.out.println("New storm center: xCenter=" + xCenter + ", yCenter=" + yCenter);
         }
     }
 
-    public boolean isPlayerInSafeZone(int playerX, int playerY) {
-        int distance = (int) Math.sqrt(Math.pow(playerX - xCenter, 2) + Math.pow(playerY - yCenter, 2));
-        return distance < radius;
-    }
-
-    // Draw the storm (blue outside, transparent inside) with camera offsets
     public void draw(Canvas canvas, int offsetX, int offsetY) {
-        // Apply camera offset to the storm's center
-        int drawX = xCenter + offsetX;
-        int drawY = yCenter + offsetY;
-
-        // Draw the storm as a large blue circle (outer storm area)
-        Color stormColor = new Color(0, 0, 255, 100);  // Blue color with transparency
-        canvas.drawCircle(drawX, drawY, radius + 50, stormColor);  // Large storm circle
-
-        // Draw the safe zone inside the storm as a transparent circle
-        Color clearColor = new Color(0, 0, 0, 0);  // Fully transparent color
-        canvas.drawCircle(drawX, drawY, radius, clearColor);  // Safe zone circle
+        Graphics2D g2d = canvas.getGraphics2D();
+        Area stormArea = new Area(new Rectangle2D.Float(offsetX, offsetY, mapWidth, mapHeight));
+        int safeZoneX = xCenter + offsetX;
+        int safeZoneY = yCenter + offsetY;
+        Area safeZone = new Area(new Ellipse2D.Float(safeZoneX - radius, safeZoneY - radius, radius * 2, radius * 2));
+        stormArea.subtract(safeZone);
+        g2d.setColor(new Color(0, 0, 255, 100));
+        g2d.fill(stormArea);
     }
 }

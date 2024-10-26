@@ -11,26 +11,20 @@ import java.io.IOException;
 
 public class Player extends Entity {
     private static final String SPRITE_PATH = "images/player.png";
-    private static final double SCALE_FACTOR = 1.7;  // Scale factor to double the player's size
-    private static final int STORM_DAMAGE = 1;       // Damage per frame when in the storm
+    private static final double SCALE_FACTOR = 1.7;
     private static final int ANIMATION_SPEED = 8;
 
     private int currentAnimationFrame = 1;
     private int nextFrame = ANIMATION_SPEED;
     private BufferedImage image;
-    private Image[] rightFrames;
-    private Image[] leftFrames;
-    private Image[] upFrames;
-    private Image[] downFrames;
+    private Image[] rightFrames, leftFrames, upFrames, downFrames;
     private Direction lastDirection;
-
     private Storm storm;
     private BattleRoyalGame game;
     private MovementController controller;
 
     public Player(MovementController controller, Storm storm, BattleRoyalGame game, World world) {
-        super(world, (int) (32 * SCALE_FACTOR), (int) (32 * SCALE_FACTOR), 5);  // Double size with scale factor
-
+        super(world, (int) (32 * SCALE_FACTOR), (int) (32 * SCALE_FACTOR), 5);
         this.storm = storm;
         this.game = game;
         this.controller = controller;
@@ -73,7 +67,6 @@ public class Player extends Entity {
         upFrames[2] = getScaledImage(image.getSubimage(64, 224, 32, 32));
     }
 
-    // Scales the given image based on the SCALE_FACTOR
     private Image getScaledImage(BufferedImage img) {
         int scaledWidth = (int) (img.getWidth() * SCALE_FACTOR);
         int scaledHeight = (int) (img.getHeight() * SCALE_FACTOR);
@@ -104,9 +97,11 @@ public class Player extends Entity {
         } else {
             currentAnimationFrame = 1;
         }
+    }
 
-        //TODO --> apply storm damage
-
+    // Method to shoot a bullet in the last facing direction
+    public void shoot() {
+        shoot(lastDirection); // Use inherited shoot method from Entity with lastDirection
     }
 
     @Override
@@ -119,17 +114,18 @@ public class Player extends Entity {
         draw(canvas, 0, 0); // Default draw with no offset
     }
 
+    @Override
     public void draw(Canvas canvas, int cameraX, int cameraY) {
         Direction direction = controller.getDirection();
         if (direction == null) {
             direction = lastDirection;
+        } else {
+            lastDirection = direction; // Update the last direction if moving
         }
 
-        // Adjust player drawing position based on camera offset
         int drawX = x - cameraX;
         int drawY = y - cameraY;
 
-        // Draw based on the direction
         if (direction == Direction.RIGHT) {
             canvas.drawImage(rightFrames[currentAnimationFrame], drawX, drawY);
         } else if (direction == Direction.LEFT) {
@@ -140,36 +136,23 @@ public class Player extends Entity {
             canvas.drawImage(downFrames[currentAnimationFrame], drawX, drawY);
         }
 
-        // Draw the player's health bar with camera offset
-        drawHealthBar(canvas, drawX, drawY);
-
-        String positionText = "Pos: (" + x + ", " + y + ")";
-        canvas.drawString(positionText, drawX, drawY - 20, Color.WHITE);
+        drawHealthBarAndBullets(canvas, cameraX, cameraY);
     }
 
-    protected void drawHealthBar(Canvas canvas, int drawX, int drawY) {
-        int barWidth = (int) (32*1.7);  // Scale health bar width to match new player size
-        int barHeight = 5;
-        int barX = drawX;
-        int barY = drawY - 10;
-
-        canvas.drawRectangle(barX, barY, barWidth, barHeight, Color.RED);
-        int healthWidth = (int) ((health / 100.0f) * barWidth);
-        canvas.drawRectangle(barX, barY, healthWidth, barHeight, Color.GREEN);
-    }
-
-    @Override
     protected void moveWithController() {
         Direction direction = controller.getDirection();
 
         if (direction != null) {
             lastDirection = direction;
+            int deltaX = 0;
+            int deltaY = 0;
             switch (direction) {
-                case UP -> y -= speed;
-                case DOWN -> y += speed;
-                case LEFT -> x -= speed;
-                case RIGHT -> x += speed;
+                case UP -> deltaY = -speed;
+                case DOWN -> deltaY = speed;
+                case LEFT -> deltaX = -speed;
+                case RIGHT -> deltaX = speed;
             }
+            moveWithinBounds(deltaX, deltaY);
         }
     }
 }

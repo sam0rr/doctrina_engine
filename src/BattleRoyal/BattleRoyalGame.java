@@ -1,35 +1,45 @@
 package BattleRoyal;
 
 import Doctrina.Canvas;
+import Doctrina.CollidableRepository;
 import Doctrina.Game;
+import Doctrina.GameTime;
 
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class BattleRoyalGame extends Game {
     private GamePad gamePad;
     private Player player;
     private World world;
-    private Camera camera;  // Camera instance
+    private Camera camera;
+    private Storm storm;
+    private int cooldown;
+    private List<Enemy> enemies;
 
-    private Storm storm;  // Storm instance
-    private int soundCooldown;  // Cooldown variable should be a field
+    private final int numberOfEnnemies = 30;
 
     @Override
     protected void initialize() {
+        CollidableRepository.getInstance().clear();
         gamePad = new GamePad();
         world = new World();
         world.load();
 
-        // Initialize the storm before the player, so it's available when creating the player
-        storm = new Storm(world.getWidth(), world.getHeight());  // Pass the world dimensions to the storm
-
-        // Initialize the player and camera
+        storm = new Storm(world, 30, 20, 20, 20,
+                15, 15, 10, 10);
         player = new Player(gamePad, storm, this, world);
-        camera = new Camera(1000, 650, world);  // Pass world to the camera
-// Set camera dimensions to match the screen width and height
-        soundCooldown = 0;  // Initialize the cooldown
+        camera = new Camera(1000, 650, world);
+        cooldown = 0;
+
+        enemies = new ArrayList<>();
+        for (int i = 0; i < numberOfEnnemies; i++) {
+            enemies.add(new Enemy(world));
+        }
 
         try {
             Clip backgroundClip = AudioSystem.getClip();
@@ -37,7 +47,7 @@ public class BattleRoyalGame extends Game {
                     getClass().getClassLoader().getResourceAsStream("audio/background.wav")
             );
             backgroundClip.open(backgroundStream);
-            backgroundClip.loop(Clip.LOOP_CONTINUOUSLY);  // Loop background music continuously
+            backgroundClip.loop(Clip.LOOP_CONTINUOUSLY);
             backgroundClip.start();
         } catch (Exception e) {
             e.printStackTrace();
@@ -46,21 +56,28 @@ public class BattleRoyalGame extends Game {
 
     @Override
     protected void update() {
-        player.update();  // Update the player
-        storm.shrink();   // Update the storm
-        camera.update(player);  // Update camera to follow the player
+        player.update();
+        storm.updateStorm();
+        camera.update(player);
+
+        for (Enemy enemy : enemies) {
+            enemy.update();
+        }
 
         if (gamePad.isQuitPressed()) {
             stop();
         }
 
-        if (soundCooldown > 0) {
-            soundCooldown--;  // Decrease cooldown over time
+        if (cooldown > 0) {
+            cooldown--;
         }
 
-        if (gamePad.isFirePressed() && soundCooldown == 0) {
-            soundCooldown = 100;
+        // Trigger shooting if fire button is pressed and cooldown is zero
+        if (gamePad.isFirePressed() && cooldown == 0) {
+            player.shoot(); // Make the player shoot a bullet in the last facing direction
+            cooldown = 20;  // Set cooldown to prevent rapid shooting
 
+            // Play shooting sound
             try {
                 Clip clip = AudioSystem.getClip();
                 AudioInputStream fireStream = AudioSystem.getAudioInputStream(
@@ -79,21 +96,28 @@ public class BattleRoyalGame extends Game {
         int offsetX = camera.getX();
         int offsetY = camera.getY();
 
-        // Draw the world based on the camera's offset
         world.draw(canvas, -offsetX, -offsetY);
-
-        // Draw the storm based on camera offset
         storm.draw(canvas, -offsetX, -offsetY);
 
-        // Draw player and other entities with camera offet
+        // Draw player with bullets
         player.draw(canvas, offsetX, offsetY);
 
+        for (Enemy enemy : enemies) {
+            enemy.draw(canvas, offsetX, offsetY);
+        }
+
+        // Display storm and game info
+        String phaseInfo = storm.getPhaseInfo();
+        Rectangle clipBounds = canvas.getGraphics2D().getClipBounds();
+        int textX = (clipBounds != null ? clipBounds.width : 800) - 200;
+        int textY = 20;
+        canvas.drawString(phaseInfo, textX, textY, Color.WHITE);
+        canvas.drawString(GameTime.getElapsedFormattedTime(), 10, 40, Color.WHITE);
+        canvas.drawString("FPS: " + GameTime.getCurrentFps(), 10, 60, Color.WHITE);
     }
 
-
-    // Method to handle player death and stop the game
     public void onPlayerDeath() {
         System.out.println("Player has died. Game Over.");
-        stop();  // Stop the game when the player dies
+        stop();
     }
 }

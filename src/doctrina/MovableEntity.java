@@ -35,8 +35,6 @@ public abstract class MovableEntity extends StaticEntity {
         collision = new Collision(this);
     }
 
-
-
     public void move() {
         int allowedSpeed = collision.getAllowedSpeed();
         x += direction.calculateVelocityX(allowedSpeed);
