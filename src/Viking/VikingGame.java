@@ -2,6 +2,7 @@ package Viking;
 
 import Doctrina.Canvas;
 import Doctrina.Game;
+import Doctrina.RenderingEngine;
 
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -35,6 +36,9 @@ public class VikingGame extends Game {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        RenderingEngine.getInstance().getScreen().fullscreen();
+        RenderingEngine.getInstance().getScreen().hideCursor();
     }
 
     @Override
@@ -59,16 +63,7 @@ public class VikingGame extends Game {
         if (gamePad.isFirePressed() && soundCooldown == 0) {
             soundCooldown = 100;
 
-            try {
-                Clip clip = AudioSystem.getClip();
-                AudioInputStream fireStream = AudioSystem.getAudioInputStream(
-                        getClass().getClassLoader().getResourceAsStream("audio/fire.wav")
-                );
-                clip.open(fireStream);
-                clip.start();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            SoundEffect.FIRE.play();
         }
 
     }

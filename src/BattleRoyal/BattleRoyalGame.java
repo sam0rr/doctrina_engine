@@ -1,9 +1,7 @@
 package BattleRoyal;
 
+import Doctrina.*;
 import Doctrina.Canvas;
-import Doctrina.CollidableRepository;
-import Doctrina.Game;
-import Doctrina.GameTime;
 
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -21,7 +19,7 @@ public class BattleRoyalGame extends Game {
     private int cooldown;
     private List<Enemy> enemies;
 
-    private final int numberOfEnnemies = 30;
+    private final int numberOfEnnemies = 20;
 
     @Override
     protected void initialize() {
@@ -30,8 +28,8 @@ public class BattleRoyalGame extends Game {
         world = new World();
         world.load();
 
-        storm = new Storm(world, 30, 20, 20, 20,
-                15, 15, 10, 10);
+        storm = new Storm(world, 5, 5, 5, 5,
+                5, 5, 5, 5);
         player = new Player(gamePad, storm, this, world);
         camera = new Camera(1000, 650, world);
         cooldown = 0;
@@ -52,6 +50,9 @@ public class BattleRoyalGame extends Game {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        RenderingEngine.getInstance().getScreen().fullscreen();
+        RenderingEngine.getInstance().getScreen().hideCursor();
     }
 
     @Override

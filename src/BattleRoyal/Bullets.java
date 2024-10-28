@@ -62,6 +62,9 @@ public class Bullets extends MovableEntity {
             hitEntity.takeDamage(damage); // Apply damage to the entity
             removeBullet(); // Mark bullet for removal upon collision
         }
+
+        //TODO ENTITY DETECT COLLISION WITH BULLETS NOT BULLETS WITH ENTITY.
+        //IN ENTITY, IN UPDATE, MAKE ENTITY TAKE DAMAGE AND OR DIE.
     }
 
     // Detect collision with entities
@@ -71,7 +74,6 @@ public class Bullets extends MovableEntity {
             if (entity instanceof Entity && entity != this && entity != ownerEntity) {
                 Entity target = (Entity) entity;
                 if (bulletBounds.intersects(target.getBounds())) {
-                    removeBullet();
                     System.out.println("entity hit: (" + x + ", " + y + ")");
                     return target; // Return entity if collision is detected
 
