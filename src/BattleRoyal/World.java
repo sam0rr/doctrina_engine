@@ -18,8 +18,8 @@ public class World {
             background = ImageIO.read(
                     this.getClass().getClassLoader().getResourceAsStream(MAP_PATH)
             );
-            width = 2400;  // Largeur du monde
-            height = 2400;  // Hauteur du monde
+            width = 3000;  // Largeur du monde
+            height = 3000;  // Hauteur du monde
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }

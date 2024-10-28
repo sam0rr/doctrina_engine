@@ -19,6 +19,7 @@ public class VikingGame extends Game {
 
     @Override
     protected void initialize() {
+
         gamePad = new GamePad();
         player = new Player(gamePad);
         world = new World();

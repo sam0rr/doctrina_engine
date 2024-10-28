@@ -3,7 +3,7 @@ package Doctrina;
 import java.util.concurrent.TimeUnit;
 
 public class GameTime {
-    private static final int FPS_TARGET = 70;
+    private static final int FPS_TARGET = 60;
 
     private static int currentFps;
     private static int fpsCount;

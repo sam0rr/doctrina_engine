@@ -19,7 +19,7 @@ public class BattleRoyalGame extends Game {
     private int cooldown;
     private List<Enemy> enemies;
 
-    private final int numberOfEnnemies = 20;
+    private final int numberOfEnnemies = 10;
 
     @Override
     protected void initialize() {
@@ -31,7 +31,9 @@ public class BattleRoyalGame extends Game {
         storm = new Storm(world, 5, 5, 5, 5,
                 5, 5, 5, 5);
         player = new Player(gamePad, storm, this, world);
-        camera = new Camera(1000, 650, world);
+        camera = new Camera(Screen.getWidth(), Screen.getHeight(), world);
+
+
         cooldown = 0;
 
         enemies = new ArrayList<>();
@@ -53,6 +55,7 @@ public class BattleRoyalGame extends Game {
 
         RenderingEngine.getInstance().getScreen().fullscreen();
         RenderingEngine.getInstance().getScreen().hideCursor();
+
     }
 
     @Override

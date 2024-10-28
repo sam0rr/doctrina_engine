@@ -33,6 +33,7 @@ public abstract class StaticEntity {
         return getBounds().intersects(entity.getBounds());
     }
 
+
     public Rectangle getBounds() {
         return new Rectangle(x, y, width, height);
     }

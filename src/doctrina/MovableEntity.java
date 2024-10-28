@@ -60,19 +60,19 @@ public abstract class MovableEntity extends StaticEntity {
         };
     }
 
-    private Rectangle getUpperHitBox() {
+    protected Rectangle getUpperHitBox() {
         return new Rectangle(x, y - speed, width, speed);
     }
 
-    private Rectangle getLowerHitBox() {
+    protected Rectangle getLowerHitBox() {
         return new Rectangle(x, y + height, width, speed);
     }
 
-    private Rectangle getLeftHitBox() {
+    protected Rectangle getLeftHitBox() {
         return new Rectangle(x - speed, y , speed, height);
     }
 
-    private Rectangle getRightHitBox() {
+    protected Rectangle getRightHitBox() {
         return new Rectangle(x + width , y, speed, height);
     }
 
