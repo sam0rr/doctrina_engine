@@ -22,6 +22,7 @@ public class Player extends ControllableEntity {
 
     public Player(MovementController controller) {
         super(controller);
+        CollidableRepository.getInstance().registerEntity(this);
         setDimensions(32,32);
         setSpeed(3);
         load();
@@ -65,7 +66,7 @@ public class Player extends ControllableEntity {
             //System.out.println("TOUJOURS EXECUTER");
         }
     }
-
+    
     @Override
     public void update() {
         super.update();
